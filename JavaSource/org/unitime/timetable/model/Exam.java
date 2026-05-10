@@ -720,7 +720,23 @@ public class Exam extends BaseExam implements Comparable<Exam> {
         } 
         return ret;
     }
-    
+
+    private Set<Exam> clearConflicts(org.hibernate.Session hibSession) {
+        Set<Exam> otherExams = new HashSet<Exam>();
+        for (Iterator<ExamConflict> j = getConflicts().iterator(); j.hasNext(); ) {
+            ExamConflict conf = j.next();
+            for (Exam x : conf.getExams()) {
+                if (!x.equals(this)) {
+                    x.getConflicts().remove(conf);
+                    otherExams.add(x);
+                }
+            }
+            hibSession.remove(conf);
+            j.remove();
+        }
+        return otherExams;
+    }
+
     public String assign(ExamAssignmentInfo assignment, String managerExternalId, Session hibSession) {
         Transaction tx = null;
         try {
@@ -734,21 +750,8 @@ public class Exam extends BaseExam implements Comparable<Exam> {
             for (ExamRoomInfo room : assignment.getRooms())
                 getAssignedRooms().add(room.getLocation(hibSession));
             setAssignedPreference(assignment.getAssignedPreferenceString());
-            
-            HashSet otherExams = new HashSet();
-            
-            for (Iterator j=getConflicts().iterator();j.hasNext();) {
-                ExamConflict conf = (ExamConflict)j.next();
-                for (Iterator i=conf.getExams().iterator();i.hasNext();) {
-                    Exam x = (Exam)i.next();
-                    if (!x.equals(this)) {
-                        x.getConflicts().remove(conf);
-                        otherExams.add(x);
-                    }
-                }
-                hibSession.remove(conf);
-                j.remove();
-            }
+
+            Set<Exam> otherExams = clearConflicts(hibSession);
 
             for (Iterator i=assignment.getDirectConflicts().iterator();i.hasNext();) {
                 ExamAssignmentInfo.DirectConflict dc = (ExamAssignmentInfo.DirectConflict)i.next();
@@ -900,21 +903,8 @@ public class Exam extends BaseExam implements Comparable<Exam> {
             if (getAssignedRooms()==null) setAssignedRooms(new HashSet());
             getAssignedRooms().clear();
             setAssignedPreference(null);
-            
-            HashSet otherExams = new HashSet();
-            
-            for (Iterator j=getConflicts().iterator();j.hasNext();) {
-                ExamConflict conf = (ExamConflict)j.next();
-                for (Iterator i=conf.getExams().iterator();i.hasNext();) {
-                    Exam x = (Exam)i.next();
-                    if (!x.equals(this)) {
-                        x.getConflicts().remove(conf);
-                        otherExams.add(x);
-                    }
-                }
-                hibSession.remove(conf);
-                j.remove();
-            }
+
+            Set<Exam> otherExams = clearConflicts(hibSession);
 
             ExamEvent event = getEvent();
             if (event!=null) hibSession.remove(event);
@@ -1191,21 +1181,8 @@ public class Exam extends BaseExam implements Comparable<Exam> {
         try {
             if (hibSession.getTransaction()==null || !hibSession.getTransaction().isActive())
                 tx = hibSession.beginTransaction();
-            
-            HashSet otherExams = new HashSet();
-            
-            for (Iterator j=getConflicts().iterator();j.hasNext();) {
-                ExamConflict conf = (ExamConflict)j.next();
-                for (Iterator i=conf.getExams().iterator();i.hasNext();) {
-                    Exam x = (Exam)i.next();
-                    if (!x.equals(this)) {
-                        x.getConflicts().remove(conf);
-                        otherExams.add(x);
-                    }
-                }
-                hibSession.remove(conf);
-                j.remove();
-            }
+
+            Set<Exam> otherExams = clearConflicts(hibSession);
             
             ExamAssignmentInfo assignment = new ExamAssignmentInfo(this, false);
             
@@ -1333,3 +1310,5 @@ public class Exam extends BaseExam implements Comparable<Exam> {
 	}
 
 }
+
+
