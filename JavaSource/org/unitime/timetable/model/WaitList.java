@@ -1,4 +1,4 @@
-/*
+ /* 
  * Licensed to The Apereo Foundation under one or more contributor license
  * agreements. See the NOTICE file distributed with this work for
  * additional information regarding copyright ownership.
@@ -15,7 +15,6 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
 */
 package org.unitime.timetable.model;
 
@@ -40,21 +39,32 @@ import org.unitime.timetable.model.base.BaseWaitList;
 @Table(name = "waitlist")
 public class WaitList extends BaseWaitList implements Comparable<WaitList> {
 	private static final long serialVersionUID = 1L;
-	
+
 	public static enum WaitListType {
-		SCHEDULING_ASSISTANT,
-		COURSE_REQUESTS,
-		XML_IMPORT,
-		BATCH_SOLVER,
-		WAIT_LIST_PORCESSING,
-		MASS_CANCEL,
-		EXTERNAL_UPDATE,
-		RELOAD,
-		OTHER,
-		RE_BATCH_ON_RELOAD,
-		RE_BATCH_ON_CHECK,
+		SCHEDULING_ASSISTANT(0),
+		COURSE_REQUESTS(1),
+		XML_IMPORT(2),
+		BATCH_SOLVER(3),
+		WAIT_LIST_PROCESSING(4),
+		MASS_CANCEL(5),
+		EXTERNAL_UPDATE(6),
+		RELOAD(7),
+		OTHER(8),
+		RE_BATCH_ON_RELOAD(9),
+		RE_BATCH_ON_CHECK(10),
 		;
-		
+
+		private final int iCode;
+
+		WaitListType(int code) { this.iCode = code; }
+
+		public int getCode() { return iCode; }
+
+		public static WaitListType fromCode(int code) {
+			for (WaitListType t : values())
+				if (t.iCode == code) return t;
+			return OTHER;
+		}
 	}
 
 /*[CONSTRUCTOR MARKER BEGIN]*/
@@ -71,17 +81,17 @@ public class WaitList extends BaseWaitList implements Comparable<WaitList> {
 	
 /*[CONSTRUCTOR MARKER END]*/
 
-	
+
 	@Transient
 	public WaitListType getWaitListType() {
 		if (getType() == null) return WaitListType.OTHER;
-		return WaitListType.values()[getType()];
+		return WaitListType.fromCode(getType());
 	}
 	public void setWaitListType(WaitListType status) {
 		if (status == null)
 			setType(null);
 		else
-			setType(status.ordinal());
+			setType(status.getCode());
 	}
 
 	@Override
