@@ -49,7 +49,7 @@ import org.unitime.timetable.model.dao.CourseDemandDAO;
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(name = "course_demand")
-public class CourseDemand extends BaseCourseDemand implements Comparable {
+public class CourseDemand extends BaseCourseDemand implements Comparable<CourseDemand> {
 	private static final long serialVersionUID = 1L;
 	
 	public static enum Critical {
@@ -103,19 +103,19 @@ public class CourseDemand extends BaseCourseDemand implements Comparable {
 
 /*[CONSTRUCTOR MARKER END]*/
 
-    public int compareTo(Object o) {
-        if (o==null || !(o instanceof CourseDemand)) return -1;
-        CourseDemand cd = (CourseDemand)o;
-        int cmp = (isAlternative().booleanValue() == cd.isAlternative().booleanValue() ? 0 : isAlternative().booleanValue() ? 1 : -1);
-        if (cmp!=0) return cmp;
-        cmp = getPriority().compareTo(cd.getPriority());
-        if (cmp!=0) return cmp;
-        return (getUniqueId() == null ? Long.valueOf(-1) : getUniqueId()).compareTo(cd.getUniqueId() == null ? -1 : cd.getUniqueId());
-    }
-    
-    public static List findAll(Long sessionId) {
-    	return findAll(CourseDemandDAO.getInstance().getSession(), sessionId);
-    }
+	@Override
+	public int compareTo(CourseDemand cd) {
+		if (cd == null) return -1;
+		int cmp = (isAlternative().booleanValue() == cd.isAlternative().booleanValue() ? 0 : isAlternative().booleanValue() ? 1 : -1);
+		if (cmp != 0) return cmp;
+		cmp = getPriority().compareTo(cd.getPriority());
+		if (cmp != 0) return cmp;
+		return (getUniqueId() == null ? Long.valueOf(-1) : getUniqueId()).compareTo(cd.getUniqueId() == null ? -1 : cd.getUniqueId());
+	}
+
+	public static List<CourseDemand> findAll(Long sessionId) {
+		return findAll(CourseDemandDAO.getInstance().getSession(), sessionId);
+	}
     
     public static List<CourseDemand> findAll(org.hibernate.Session hibSession, Long sessionId) {
         return hibSession.
