@@ -1,4 +1,4 @@
-/*
+	/*
  * Licensed to The Apereo Foundation under one or more contributor license
  * agreements. See the NOTICE file distributed with this work for
  * additional information regarding copyright ownership.
@@ -19,6 +19,9 @@
 */
 package org.unitime.timetable.model;
 
+import jakarta.persistence.Transient;
+import java.util.Date;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
@@ -33,8 +36,32 @@ import org.unitime.timetable.model.base.BaseStudentNote;
 public class StudentNote extends BaseStudentNote implements Comparable<StudentNote> {
 	private static final long serialVersionUID = 1L;
 
+	public static final int MAX_NOTE_LENGTH = 1000;
+
 	public StudentNote() {
 		super();
+	}
+
+	public static StudentNote create(Student student, String text, String userId) {
+		if (text == null || text.isBlank())
+			throw new IllegalArgumentException("Student note text must not be blank.");
+		if (text.length() > MAX_NOTE_LENGTH)
+			throw new IllegalArgumentException(
+					"Student note text exceeds the maximum allowed length of "
+							+ MAX_NOTE_LENGTH + " characters.");
+		StudentNote note = new StudentNote();
+		note.setStudent(student);
+		note.setTextNote(text.trim());
+		note.setUserId(userId);
+		note.setTimeStamp(new Date());
+		return note;
+	}
+
+	@Transient
+	public boolean isValid() {
+		return getTextNote() != null
+				&& !getTextNote().isBlank()
+				&& getTextNote().length() <= MAX_NOTE_LENGTH;
 	}
 
 	@Override
