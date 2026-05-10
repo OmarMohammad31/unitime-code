@@ -53,32 +53,66 @@ public class ExamConflict extends BaseExamConflict implements Comparable<ExamCon
 	
 /*[CONSTRUCTOR MARKER END]*/
 
-	
-	public static final int sConflictTypeDirect = 0;
-    public static final int sConflictTypeMoreThanTwoADay = 1;
-	public static final int sConflictTypeBackToBackDist = 2;
-	public static final int sConflictTypeBackToBack = 3;
-	
-	public static String[] sConflictTypes = new String[] {"Distance", ">2 A Day", "Distance Back-To-Back", "Back-To-Back"};
-	
-	@Transient
+    public enum ConflictType {
+        DIRECT(0,               "Distance"),
+        MORE_THAN_TWO_A_DAY(1,  ">2 A Day"),
+        BACK_TO_BACK_DIST(2,    "Distance Back-To-Back"),
+        BACK_TO_BACK(3,         "Back-To-Back");
+
+        private final int code;
+        private final String label;
+
+        ConflictType(int code, String label) {
+            this.code  = code;
+            this.label = label;
+        }
+
+        public int    getCode()  { return code; }
+        public String getLabel() { return label; }
+
+        public static ConflictType fromCode(int code) {
+            for (ConflictType t : values())
+                if (t.code == code) return t;
+            throw new IllegalArgumentException("Unknown conflict type code: " + code);
+        }
+    }
+
+    @Deprecated public static final int sConflictTypeDirect          = 0;
+    @Deprecated public static final int sConflictTypeMoreThanTwoADay = 1;
+    @Deprecated public static final int sConflictTypeBackToBackDist  = 2;
+    @Deprecated public static final int sConflictTypeBackToBack      = 3;
+    @Deprecated public static String[] sConflictTypes =
+            new String[] {"Distance", ">2 A Day", "Distance Back-To-Back", "Back-To-Back"};
+
+    @Transient
+    public String getConflictTypeName() {
+        return ConflictType.fromCode(getConflictType()).getLabel();
+    }
+
+    @Transient
+    public ConflictType getConflictTypeEnum() {
+        return ConflictType.fromCode(getConflictType());
+    }
+
+    @Transient
     public boolean isDirectConflict() {
-        return sConflictTypeDirect==getConflictType();
+        return ConflictType.DIRECT.getCode() == getConflictType();
     }
 
-	@Transient
+    @Transient
     public boolean isMoreThanTwoADayConflict() {
-        return sConflictTypeMoreThanTwoADay==getConflictType();
+        return ConflictType.MORE_THAN_TWO_A_DAY.getCode() == getConflictType();
     }
 
-	@Transient
+    @Transient
     public boolean isBackToBackConflict() {
-        return sConflictTypeBackToBack==getConflictType() || sConflictTypeBackToBackDist==getConflictType();
+        return getConflictType() == ConflictType.BACK_TO_BACK.getCode()
+                || getConflictType() == ConflictType.BACK_TO_BACK_DIST.getCode();
     }
 
-	@Transient
+    @Transient
     public boolean isDistanceBackToBackConflict() {
-        return sConflictTypeBackToBackDist==getConflictType();
+        return ConflictType.BACK_TO_BACK_DIST.getCode() == getConflictType();
     }
     
     public int compareTo(ExamConflict conflict) {
