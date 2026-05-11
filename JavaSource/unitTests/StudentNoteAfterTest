@@ -1,0 +1,40 @@
+package unitTests;
+
+import org.junit.jupiter.api.Test;
+import org.unitime.timetable.model.Student;
+import org.unitime.timetable.model.StudentNote;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class StudentNoteAfterTest {
+
+    @Test
+    void testAfterFix_ValidationOnCreate() {
+        // Prevents null or blank notes
+        assertThrows(IllegalArgumentException.class, () ->
+                StudentNote.create(new Student(0L), null, "user123"));
+
+        assertThrows(IllegalArgumentException.class, () ->
+                StudentNote.create(new Student(0L), "  ", "user123"));
+
+        // Prevents notes exceeding length
+        String longText = "a".repeat(1001);
+        assertThrows(IllegalArgumentException.class, () ->
+                StudentNote.create(new Student(0L), longText, "user123"));
+    }
+
+    @Test
+    void testAfterFix_AutomaticConsistency() {
+        String text = "  Important Note  ";
+        StudentNote note = StudentNote.create(new Student(0L), text, "user123");
+
+        // Text is trimmed now
+        assertEquals("Important Note", note.getTextNote());
+
+        // Timestamp is never null now
+        assertNotNull(note.getTimeStamp());
+
+        // isValid() exists now
+        assertTrue(note.isValid());
+    }
+}
