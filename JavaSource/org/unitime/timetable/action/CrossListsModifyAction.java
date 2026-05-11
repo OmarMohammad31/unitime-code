@@ -119,6 +119,10 @@ public class CrossListsModifyAction extends UniTimeAction<CrossListsModifyForm> 
         // Get operation
     	if (op == null) op = form.getOp();
     	if (op2 != null && !op2.isEmpty()) op = op2;
+		
+		if (request == null || sessionContext == null) {
+    		throw new IllegalStateException("Request or session context is not initialized.");
+		}
         
         if(op==null || op.trim().length()==0)
             throw new Exception (MSG.errorOperationNotInterpreted() + op);
