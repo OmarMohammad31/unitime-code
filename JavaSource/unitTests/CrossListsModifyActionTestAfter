@@ -1,0 +1,16 @@
+package unitTests;
+
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+public class CrossListsModifyActionTestAfter {
+
+    @Test
+    public void testSafeEqualsDoesNotThrowNullPointer() {
+
+        String op = null;
+
+        assertDoesNotThrow(() -> {
+            "UPDATE".equalsIgnoreCase(op);
+        });
+    }
+}
